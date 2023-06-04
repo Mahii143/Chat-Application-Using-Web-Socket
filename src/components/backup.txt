@@ -1,0 +1,40 @@
+
+  // useEffect(() => {
+  //   const endpointUser = "http://localhost:3001/user";
+  //   const endpointReciever = "http://localhost:3001/reciever";
+  //   fetch(endpointUser, {
+  //     method: "GET",
+  //     headers: {
+  //       Accept: "application/json",
+  //       Authorization: "Bearer " + token.accessToken,
+  //     },
+  //   })
+  //     .then((res) => {
+  //       if (!res.ok) {
+  //         throw new Error("User not found!"); // Throw an error if the response is not successful
+  //       }
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       setState({...state, sender_id:data[0].id, sender_name:data[0].name});
+  //       console.log(state);
+  //     });
+  //   fetch(endpointReciever, {
+  //     method: "GET",
+  //     headers: {
+  //       Accept: "application/json",
+  //       Authorization: "Bearer " + token.accessToken,
+  //     },
+  //   })
+  //     .then((res) => {
+  //       if (!res.ok) {
+  //         throw new Error("User not found!"); // Throw an error if the response is not successful
+  //       }
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       setState({...state, reciever_id:data[0].id, reciever_name:data[0].name});
+  //       console.log(state);
+  //     });
+  //   // eslint-disable-next-line
+  // });

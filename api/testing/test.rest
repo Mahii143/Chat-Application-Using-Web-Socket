@@ -1,0 +1,18 @@
+GET http://localhost:3001/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODU4NjEzMDd9.n95HR8NTJ5TGqGn3iiwdt0nKyjtx9we0iX-9SXWeypo
+
+### 
+GET http://localhost:3001/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODU4NjEzMDd9.n95HR8NTJ5TGqGn3iiwdt0nKyjtx9we0iX-9SXWeypo
+
+
+###
+
+POST http://localhost:3001/login
+Content-Type: application/json
+
+{
+    "username":"usman"
+}
+
+###
