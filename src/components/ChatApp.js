@@ -2,23 +2,35 @@ import React, { useState } from "react";
 import useWebSocket from "react-use-websocket";
 import LogoutBtn from "./LogoutBtn";
 import { useEffect } from "react";
+import LogoImg from "../images/logo.png";
+import { Route, Routes, useParams } from "react-router-dom";
+import ChannelList from "./ChannelList";
+import MessageBox from "./MessageBox";
 
 const wsurl = "ws://localhost:3001";
 
 const emptyObject = {
-  reciever_id: "",
-  sender_id: "",
-  sender_name: "",
-  reciever_name: "",
+  reciever_id: null,
+  sender_id: null,
+  sender_name: null,
+  reciever_name: null,
 };
 
 const ChatApp = ({ token, setToken }) => {
   const [content, setContent] = useState("");
   const [data, setData] = useState([]);
-  const [state, setState] = useState({ ...emptyObject });
+  const [state, setState] = useState(emptyObject);
+  const [channels, setChannels] = useState([]);
+  const [cid, setChannelId] = useState("");
+
+  const params = useParams();
+  useEffect(() => {
+    setChannelId(params["*"]);
+  }, [params["*"]]);
+
   const handleMessage = (event) => {
     const _data = JSON.parse(event.data);
-    console.log("Handle Message", _data);
+    // console.log("Handle Message", _data);
     setData([_data, ...data]);
   };
 
@@ -35,14 +47,14 @@ const ChatApp = ({ token, setToken }) => {
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-    // eslint-disable-next-line
-  }, [data.length]);
+  // useEffect(() => {
+  //   console.log(data);
+  //   // eslint-disable-next-line
+  // }, [data.length]);
 
   useWebSocket(wsurl, {
     onOpen: () => {
-      console.log("websocket connection established.");
+      // console.log("websocket connection established.");
     },
     onMessage: handleMessage,
     share: true,
@@ -53,11 +65,28 @@ const ChatApp = ({ token, setToken }) => {
 
   useEffect(() => {
     const endpointUser = "http://localhost:3001/user";
-    const endpointReciever = "http://localhost:3001/reciever";
+    const endpointReceiver = "http://localhost:3001/receiver";
 
-    const fetchUser = async () => {
+    const updateState = (userData, receiverData) => {
+      console.log("user data: ", userData);
+      console.log("receiver data: ", receiverData);
+      console.log("update state", state);
+      setState((prev) => {
+        const newState = {
+          ...prev,
+          sender_id: userData[0].id,
+          sender_name: userData[0].name,
+          reciever_id: receiverData[0].id,
+          reciever_name: receiverData[0].name,
+        };
+        console.log("Updated state:", newState);
+        return newState;
+      });
+    };
+
+    const fetchData = async () => {
       try {
-        const res = await fetch(endpointUser, {
+        const userRes = await fetch(endpointUser, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -65,24 +94,13 @@ const ChatApp = ({ token, setToken }) => {
           },
         });
 
-        if (!res.ok) {
+        if (!userRes.ok) {
           throw new Error("User not found!");
         }
 
-        const data = await res.json();
-        setState((prevState) => ({
-          ...prevState,
-          sender_id: data[0].id,
-          sender_name: data[0].name,
-        }));
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        const userData = await userRes.json();
 
-    const fetchReceiver = async () => {
-      try {
-        const res = await fetch(endpointReciever, {
+        const receiverRes = await fetch(endpointReceiver, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -90,31 +108,31 @@ const ChatApp = ({ token, setToken }) => {
           },
         });
 
-        if (!res.ok) {
+        if (!receiverRes.ok) {
           throw new Error("Receiver not found!");
         }
 
-        const data = await res.json();
-        setState((prevState) => ({
-          ...prevState,
-          reciever_id: data[0].id,
-          reciever_name: data[0].name,
-        }));
+        const receiverData = await receiverRes.json();
+
+        updateState(userData, receiverData);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchUser();
-    fetchReceiver();
+    fetchData();
+    // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    console.log(state); // Logs the state whenever it changes
-  }, [state]);
+  // useEffect(() => {
+  //   console.log(state); // Logs the state whenever it changes
+  // }, [state]);
 
-  const send = async () => {
-    const endpointSend = "http://localhost:3001/send";
+  const send = async (e) => {
+    e.preventDefault();
+    if (content === "" || cid === null) return;
+    // const endpointSend = "http://localhost:3001/send";
+    const endpointSend = "http://localhost:3002/send-message";
     try {
       await fetch(endpointSend, {
         method: "POST",
@@ -124,21 +142,35 @@ const ChatApp = ({ token, setToken }) => {
           Authorization: "Bearer " + token.accessToken,
         },
         body: JSON.stringify({
-          senderid: state.sender_id,
-          receiverid: state.reciever_id,
+          channel_id: cid,
           content: content,
           timestamp: Date.now(),
         }),
       });
+      setContent("");
     } catch (err) {
       console.log(err.message);
     }
   };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      // document.getElementById("myForm").submit();
+      send(e);
+    }
+  };
+
+  useState(() => {
+    console.log(state);
+  }, [state]);
+
   return (
     <>
       <nav>
         <div className="logo">
-          <h1>ChatApp</h1>
+          <img src={LogoImg} alt="logo" />
+          <h1>Chat App</h1>
         </div>
         <div className="profile">
           <p>{state.sender_name}</p>
@@ -146,35 +178,55 @@ const ChatApp = ({ token, setToken }) => {
         </div>
       </nav>
       <div className="main-container">
-        <div className="reciever-profile">{state.reciever_name}</div>
-        <div className="message-container">
-          {data.map((object, index) => {
-            return (
-              <div className="message-box" key={index}>
-                <div
-                  className={
-                    "message " +
-                    (object.sender_id === state.sender_id
-                      ? "sender"
-                      : "reciever")
-                  }
-                >
-                  <p>{object.content}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="controls">
-          <input
-            type="text"
-            name="content"
-            value={content}
-            onChange={(e) => {
-              setContent(e.target.value);
-            }}
-          />
-          <button onClick={send}>send</button>
+        <div className="message-wrap">
+          <div className="channel-wrap-container">
+            <ChannelList
+              token={token}
+              setChannels={setChannels}
+              setChannelId={setChannelId}
+            />
+          </div>
+          <div className="message-container-wrap">
+            <div className="reciever-profile">
+              <p>
+                <strong>#</strong> {state.reciever_name}
+              </p>
+            </div>
+            <div className="message-container">
+              <Routes>
+                {/* <Route path="/" element={<MessageBox data={data} state={state}/>} /> */}
+                {channels.map((object) => {
+                  return (
+                    <Route
+                      key={object.channel_id}
+                      path={"/" + object.channel_id}
+                      element={
+                        <MessageBox
+                          data={data}
+                          setData={setData}
+                          token={token}
+                          channel={object.channel_id}
+                          state={state}
+                        />
+                      }
+                    />
+                  );
+                })}
+              </Routes>
+            </div>
+            <form onSubmit={send} className="controls" id="myForm">
+              <textarea
+                placeholder="type in your message"
+                name="content"
+                value={content}
+                onChange={(e) => {
+                  setContent(e.target.value);
+                }}
+                onKeyDown={handleKeyDown}
+              ></textarea>
+              {/* <button>send</button> */}
+            </form>
+          </div>
         </div>
       </div>
     </>

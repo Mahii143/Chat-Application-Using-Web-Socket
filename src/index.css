@@ -1,7 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;700&display=swap");
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Nunito", sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+textarea::-webkit-scrollbar, .channel-container::-webkit-scrollbar {
+  display: none;
+}
+
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: var(--darkgray);
+}
+
+:root {
+  --purple: #db39f6;
+  --lighterpurple: #e988ff;
+  /* --blue: rgb(255, 17, 9); */
+  --greenshade: #39f67a;
+  --shadow: #222222;
+  --magenda: #f639d8;
+  --coral: #f6395f;
+  --lightercoral: #ff8c7b;
+  --messagefont: #fff;
+  --messagebg: rgb(203, 197, 213);
+
+  /* discord color pallets */
+
+  --lightblue: #7289da;
+  --verylightgray: #91969a;
+  --morelightgray: #32333a;
+  --channelgray: #393a41;
+  --midlightgray: #36393e;
+  --gray: #282b30;
+  --darkgray: #1e2124;
+
+  /* discord color pallets */
 }
 
 #root {
@@ -14,31 +59,125 @@
   width: 100%;
 }
 
+/* login page starts */
+
+.login-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--midlightgray);
+}
+.login-form {
+  border-radius: 5px;
+  width: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: var(--darkgray);
+  box-shadow: 0 0 4px 0 var(--shadow);
+}
+.login-form h1 {
+  color: var(--messagefont);
+  font-weight: 400;
+}
+.login-form p {
+  margin-top: 0.3rem;
+  color: var(--verylightgray);
+  font-weight: 200;
+}
+
+.login-form .login-input-label {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--messagefont);
+}
+
+.login-form label {
+  padding: 1rem 1rem 0 1rem;
+}
+.login-form input,
+.login-form button {
+  all: unset;
+  width: 350px;
+  background-color: var(--morelightgray);
+  padding: 0.6rem 1rem;
+  border-radius: 3px;
+  color: var(--messagefont);
+}
+
+.login-form button {
+  margin: 1rem;
+  text-align: center;
+  background-color: var(--lightblue);
+  color: var(--messagefont);
+}
+
+/* login page ends */
+
+/* chatapp starts */
 nav {
+  position: relative;
   width: 100%;
   height: 10%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--lightblue);
+  z-index: 1;
 }
 .logo {
-  width: 40%;
+  width: 25%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+.logo img {
+  height: 55px;
+  width: 55px;
+  margin: 1rem;
+}
+
+.logo h1 {
+  font-size: 2.3rem;
+  text-transform: uppercase;
+  color: white;
+}
+
+.logout-button {
+  all: unset;
+}
+
+.logout-button:hover {
+  color: var(--darkgray);
+}
+
 .profile {
-  width: 60%;
+  width: 75%;
   height: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-end;
   align-items: center;
   flex-direction: row;
+  color: white;
+  text-transform: capitalize;
+}
+
+.profile p,
+.profile button {
+  margin: 1rem;
+  padding: 0.4rem 1rem;
 }
 
 .main-container {
-  border: 1px solid black;
   width: 100%;
   height: 90%;
 }
@@ -49,18 +188,90 @@ nav {
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 0;
+  color: white;
+  text-transform: capitalize;
+  border-bottom: 2px solid var(--darkgray);
 }
+
+.reciever-profile p {
+  width: 100%;
+  text-align: left;
+  margin-left: 3rem;
+}
+
+.message-wrap {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.message-container-wrap {
+  width: 75%;
+  height: 100%;
+  background-color: var(--channelgray);
+  border-left: 0.1px solid var(--darkgray);
+}
+
+/* channel box starts */
+
+.channel-wrap-container {
+  height: 100%;
+  width: 25%;
+  background-color: var(--midlightgray);
+  display: flex;
+  flex-direction: column;
+  color: var(--messagefont);
+}
+
+.channel-wrap-container h3 {
+  height: 10%;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 0 4px 0 var(--shadow);
+}
+.channel-wrap-container .channel-container {
+  height: 90%;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: 1rem;
+}
+.channel-wrap-container .channel-container .channel-box {
+  width: 100%;
+  text-transform: lowercase;
+  padding: 0.5rem 2rem;
+}
+
+.channel-box {
+  color: var(--messagefont);
+  text-decoration: none;
+}
+
+.channel-box:hover {
+  color: var(--lightblue);
+  cursor: pointer;
+}
+
+/* channel box ends */
 .message-container {
-  border: 1px solid black;
   padding: 1rem 1rem;
   height: 80%;
+  width: 100%;
   display: flex;
   justify-content: flex-start;
   flex-direction: column-reverse;
   align-items: center;
   overflow-y: auto;
+  z-index: -1;
 }
 .message-box {
+  border-top: 1px solid var(--verylightgray);
   width: 100%;
 }
 .message-box .sender {
@@ -71,26 +282,58 @@ nav {
 }
 
 .sender {
-  background-color: green;
+  color: var(--messagefont);
+  text-align: left;
 }
 .reciever {
-  background-color: gray;
+  color: var(--messagefont);
+  text-align: left;
 }
 
 .message {
-  border: 1px solid black;
-  border-radius: 12px;
-  height: 80%;
+  text-overflow: clip;
   max-width: 80%;
   margin: 0.7rem;
-  padding: 0.3rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+.message p {
+  padding: 0.75rem 1rem;
+  white-space: pre-wrap; /* Allow text to wrap and preserve line breaks */
+  word-break: break-word; /* Break words to fit within the container */
+}
+
 .controls {
   height: 10%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+textarea {
+  all: unset;
+  margin: 0.4rem;
+}
+textarea {
+  height: 30%;
+  width: 80%;
+  background-color: var(--morelightgray);
+  padding: 0.8rem 1rem;
+  border-radius: 3px;
+  color: var(--messagefont);
+}
+
+::placeholder {
+  color: var(--verylightgray);
+}
+
+/* chatapp ends */
+
+
+input:hover {
+  cursor:text;
+} 
+button:hover {
+  cursor: pointer;
 }

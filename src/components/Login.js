@@ -15,12 +15,12 @@ const Login = ({ setToken }) => {
         },
         body: JSON.stringify({ username: username }),
       })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Login failed!"); // Throw an error if the response is not successful
-        }
-        return res.json();
-      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Login failed!"); // Throw an error if the response is not successful
+          }
+          return res.json();
+        })
         .then((data) => setToken({ ...data }));
     } catch (error) {
       console.log(error.message);
@@ -29,17 +29,23 @@ const Login = ({ setToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await getToken(username);
-    console.log("form submitted", username);
+    // console.log("form submitted", username);
   };
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>Login</h1>
-      <input
-        type="text"
-        name="username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+    <form onSubmit={handleSubmit} className="login-form">
+      <h1>Good to see you again</h1>
+      <p>Welcome to Mahir chatapp!</p>
+      <label htmlFor="uname" className='login-input-label'>
+        USER NAME
+        <input
+          type="text"
+          name="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          id="uname"
+          placeholder="user name"
+        />
+      </label>
       <button>submit</button>
     </form>
   );

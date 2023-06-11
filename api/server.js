@@ -22,7 +22,7 @@ const clients = [];
 
 const users = [
   {
-    id: "mahir143",
+    id: "maoisxainsca",
     name: "mahir",
   },
   {
@@ -54,6 +54,8 @@ wapp.on("connection", (socket) => {
  */
 app.get("/user", authenticateToken, (req, res) => {
   const user = users.filter((user) => user.name === req.user.name);
+  console.log('user send');
+
   if (user.length === 0) return res.sendStatus(404);
   res.json(user);
 });
@@ -69,8 +71,9 @@ app.get("/getmessages", authenticateToken, (_, res) => {
     });
 });
 
-app.get("/reciever", authenticateToken, (req, res) => {
+app.get("/receiver", authenticateToken, (req, res) => {
   const authorisedUser = users.filter((user) => user.name === req.user.name);
+  console.log('receiver send');
   if (authorisedUser.length === 0) return res.sendStatus(403);
   res.json(users.filter((user) => user.name !== req.user.name));
 });

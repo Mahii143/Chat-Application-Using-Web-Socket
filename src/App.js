@@ -3,30 +3,35 @@ import { useState } from "react";
 import Login from "./components/Login";
 import { useEffect } from "react";
 import ChatApp from "./components/ChatApp";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   const [token, setToken] = useState({
     accessToken: localStorage.getItem("accessToken"),
     refreshToken: localStorage.getItem("refreshToken"),
   });
-  // useState(localStorage.getItem('accessToken'));
+
   useEffect(() => {
     if (token.accessToken !== null)
       localStorage.setItem("accessToken", token.accessToken);
     if (token.refreshToken !== null)
       localStorage.setItem("refreshToken", token.refreshToken);
-    // return console.log(token);
   }, [token]);
+  
   if (token.accessToken === null && token.refreshToken === null)
     return (
       <div className="app">
-        <Login setToken={setToken} />
+        <div className="login-container">
+          <Login setToken={setToken} />
+        </div>
       </div>
     );
   else
     return (
       <div className="app">
-        <ChatApp token={token} setToken={setToken} />
+        <Routes>
+          <Route path="*" element={<ChatApp token={token} setToken={setToken} />} />
+        </Routes>
       </div>
     );
 }
