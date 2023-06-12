@@ -33,16 +33,53 @@ const users = [
 ];
 
 /**  Web socket starts **/
+const channelsAndClients = {};
 wapp.on("connection", (socket) => {
   const uid = uuid.v4();
+
   clients[uid] = socket;
+  const client = {
+    uid: uid,
+    socket: socket,
+  };
   console.log(`Client ${uid} is connected!`);
 
-  socket.on("message", (message) => {});
+  socket.on("message", (message) => {
+    const messageObj = JSON.parse(message.toString());
+
+    if (messageObj.message === "connected to channel" && messageObj.channel) {
+      if (!channelsAndClients[messageObj.channel]) {
+        channelsAndClients[messageObj.channel] = [];
+      }
+      if (
+        messageObj.prevChannel &&
+        messageObj.prevChannel !== messageObj.channel &&
+        channelsAndClients[messageObj.prevChannel].includes(client)
+      ) {
+        console.log(`already exist ${client} on ${messageObj.channel}`);
+        channelsAndClients[messageObj.prevChannel] = channelsAndClients[
+          messageObj.prevChannel
+        ].filter((cl) => cl.uid !== client.uid);
+      }
+      if (client && channelsAndClients[messageObj.channel]) {
+        if (!channelsAndClients[messageObj.channel].includes(client)) {
+          channelsAndClients[messageObj.channel].push(client);
+        }
+      }
+
+      console.log(channelsAndClients);
+      console.log(messageObj);
+    }
+  });
 
   socket.on("error", (error) => {});
 
   socket.on("close", () => {
+    for (const channel in channelsAndClients) {
+      channelsAndClients[channel] = channelsAndClients[channel].filter(
+        (cl) => cl.uid !== client.uid
+      );
+    }
     console.log(`Client disconnected!`);
   });
 });
@@ -92,26 +129,6 @@ app.post("/channel-messages", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
-  // message2
-  //   .checkUserChannel(user_id, channel_id)
-  //   .then((response) => {
-  //     isAuthorised = response[0].is_authorised;
-  //     // console.log(isAuthorised);
-  //   })
-  //   .then((error) => {
-  //     res.status(500).send(error);
-  //   });
-
-  // if (!isAuthorised) return res.sendStatus(403);
-
-  // message2
-  //   .getMessagesOfChannel(channel_id)
-  //   .then((response) => {
-  //     res.status(200).send(response);
-  //   })
-  //   .then((error) => {
-  //     res.status(500).send(error);
-  //   });
 });
 /**  Getting messages from table using channel ID ends */
 
@@ -146,15 +163,64 @@ app.post("/send-message", authenticateToken, async (req, res) => {
   if (authorisedUser.length === 0) return res.sendStatus(403);
   const user_id = users.find((user) => user.name === req.user.name).id;
   req.user.id = user_id;
-  console.log(req.user);
+  // console.log(req.user);
   try {
     const response = await message2.sendMessage(req);
-    return res.status(200).send(response);
+    if (channelsAndClients[req.body.channel_id]) {
+      const clients = channelsAndClients[req.body.channel_id];
+      const message = response; // Replace with your actual message
+
+      clients.forEach((client) => {
+        const { socket } = client;
+        if (socket.readyState === 1) {
+          socket.send(message);
+          console.log(`Broadcasted ${message} to Client ${client.uid}`);
+        } else {
+          console.log(`WebSocket of Client ${client.uid} is not open`);
+        }
+      });
+    } else {
+      console.log(`Channel ${req.body.channel_id} does not exist`);
+    }
+    return res.status(200).send("Successfully inserted!");
   } catch (error) {
     res.status(500).send(error);
   }
 });
 /**  API for sending message to a specific channel ends */
+
+/**  API for creating a channel starts */
+app.post("/create-channel", authenticateToken, async (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+  req.user.id = users.find( (user) => user.name === req.user.name ).id;
+  try {
+    const response = await message2.createChannel(req);
+    return res.status(200).send(response);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+/**  API for creating a channel ends */
+
+/**  API for joining a channel ends */
+
+app.post('/join-channel', authenticateToken, async (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+  req.user.id = users.find( (user) => user.name === req.user.name ).id;
+
+  try {
+    const response = await message2.joinChannel(req);
+    return res.status(200).send(response);
+  }
+  catch(error) {
+    return res.status(500).send(error);
+  }
+
+});
+
+/**  API for joining a channel ends */
 
 /**
  * when user login with an user name

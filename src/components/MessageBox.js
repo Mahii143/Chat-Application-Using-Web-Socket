@@ -1,7 +1,19 @@
 import React, { useEffect } from "react";
+import { ReadyState } from "react-use-websocket";
 
-const MessageBox = ({ token, data, state, channel, setData }) => {
-  //   const [data, setData] = useState([]);
+const MessageBox = ({
+  token,
+  data,
+  state,
+  channel,
+  setData,
+  sendMessage,
+  readyState,
+  messageHistory,
+  setMessageHistory,
+  channelName,
+  setChannelName,
+}) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,30 +38,60 @@ const MessageBox = ({ token, data, state, channel, setData }) => {
       }
     };
     fetchData();
+    // eslint-disable-next-line
   }, [channel]);
 
-  return (
-    <>
-      {data.map((object, index) => {
-        return (
-          <div className="message-box" key={index}>
-            <div
-              className={
-                "message " +
-                (object.sender_id === state.sender_id ? "sender" : "reciever")
-              }
-            >
-              <p>
-                {" "}
-                {(object.sender_id === state.sender_id ? "" : "~ ") +
-                  object.content}
-              </p>
+  useEffect(() => {
+    if (ReadyState.OPEN === readyState) {
+      sendMessage(
+        JSON.stringify({
+          message: "connected to channel",
+          channel: channel,
+          prevChannel: messageHistory
+            ? messageHistory[messageHistory.length - 1]
+            : null,
+        })
+      );
+      setMessageHistory([...messageHistory, channel]);
+    }
+    // eslint-disable-next-line
+  }, [channel, readyState]);
+  
+  useEffect(() => {
+    setChannelName(channelName);
+    // eslint-disable-next-line
+  }, [channelName]);
+
+  if (data.length > 0) {
+    return (
+      <>
+        {data.map((object, index) => {
+          return (
+            <div className="message-box" key={index}>
+              <div
+                className={
+                  "message " +
+                  (object.sender_id === state.sender_id ? "sender" : "reciever")
+                }
+              >
+                <p>
+                  {" "}
+                  {(object.sender_id === state.sender_id ? "" : "~ ") +
+                    object.content}
+                </p>
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </>
-  );
+          );
+        })}
+      </>
+    );
+  } else {
+    return (
+      <div className="default-page">
+        <p>Say something...</p>
+      </div>
+    );
+  }
 };
 
 export default MessageBox;

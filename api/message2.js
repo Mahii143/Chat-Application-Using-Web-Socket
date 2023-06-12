@@ -8,6 +8,8 @@ const pool = new Pool({
 });
 const uuid = require("uuid");
 
+/****************** get methods starts ******************/
+
 //getting all channels of a userid
 const getChannelsOfUser = (id) => {
   return new Promise(function (resolve, reject) {
@@ -88,6 +90,10 @@ const getChannel = (id) => {
   });
 };
 
+/****************** get methods ends ******************/
+
+/****************** post methods starts ****************/
+
 // sending a message to db
 const sendMessage = (req) => {
   return new Promise(function (resolve, reject) {
@@ -96,34 +102,21 @@ const sendMessage = (req) => {
     const { channel_id, content, timestamp } = req.body;
     // console.log('received datas: ', mid, sender_id, channel_id, content, timestamp);
 
-    if(content === '' || channel_id === '') reject("Can't insert query due to no content or no channel specified error;");
+    if (content === "" || channel_id === "")
+      reject(
+        "Can't insert query due to no content or no channel specified error;"
+      );
 
     pool.query(
       'INSERT INTO public."MessageHistory"( message_id, channel_id, sender_id, content, timestamp) VALUES ($1,$2,$3,$4,$5)',
       [mid, channel_id, sender_id, content, timestamp],
       (error, _) => {
-        if (error) reject('query error');
-        resolve("successfully inserted!");
-      }
-    );
-  });
-};
-
-/* ----------------------------------------------- */
-
-
-const createMessage = (body) => {
-  return new Promise(function (resolve, reject) {
-    const { senderid, receiverid, content, timestamp } = body;
-    pool.query(
-      'INSERT INTO public."MessageHistory" ( sender_id, receiver_id, content, timestamp) VALUES ($1, $2, $3, $4) RETURNING *',
-      [senderid, receiverid, content, timestamp],
-      (error, _) => {
-        if (error) reject(error);
+        if (error) reject("query error");
         resolve(
           JSON.stringify({
-            sender_id: senderid,
-            reciever_id: receiverid,
+            message_id: mid,
+            channel_id: channel_id,
+            sender_id: sender_id,
             content: content,
             timestamp: timestamp,
           })
@@ -133,11 +126,59 @@ const createMessage = (body) => {
   });
 };
 
+// creating a new channel
+const createChannel = (req) => {
+  const channel_admin = req.user.id;
+  // console.log(channel_admin);
+  const channel_id = uuid.v4();
+  const { channel_name } = req.body;
+  return new Promise(async function (resolve, reject) {
+    pool.query(
+      'INSERT INTO public."Channels" (channel_id, channel_name, channel_admin) VALUES ($1, $2, $3)',
+      [channel_id, channel_name, channel_admin],
+      (error, _) => {
+        if (error) reject(error);
+      }
+    );
+    req.body.channel_id = channel_id;
+    req.body.part_role = "admin";
+    try{
+      await joinChannel(req);
+    } catch(error) {
+      resolve(error);
+    }
+    resolve("channel successfully created");
+  });
+};
+
+// joining the channel
+const joinChannel = (req) => {
+  const part_id = uuid.v4();
+  const part_user_id = req.user.id;
+  const channel_id = req.body.channel_id;
+  const part_role = req.body.part_role ? req.body.part_role : "member";
+
+  console.log(req.body);
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'INSERT INTO public."ChannelParticipants"( part_id, part_user_id, part_role, channel_id) VALUES ($1, $2, $3, $4)',
+      [part_id, part_user_id, part_role, channel_id],
+      (error, _) => {
+        if (error) reject("query error");
+        resolve("joined the channel successfully");
+      }
+    );
+  });
+};
+
+/****************** post methods ends ******************/
+
 module.exports = {
   getChannelsOfUser,
   checkUserChannel,
   getMessagesOfChannel,
   getChannel,
   sendMessage,
-  createMessage,
+  createChannel,
+  joinChannel,
 };

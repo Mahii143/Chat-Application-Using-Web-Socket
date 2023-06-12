@@ -300,6 +300,7 @@ nav {
 }
 
 .message p {
+  font-size: 15px;
   padding: 0.75rem 1rem;
   white-space: pre-wrap; /* Allow text to wrap and preserve line breaks */
   word-break: break-word; /* Break words to fit within the container */
@@ -336,4 +337,13 @@ input:hover {
 } 
 button:hover {
   cursor: pointer;
+}
+.default-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--verylightgray);
+  text-align: center;
 }

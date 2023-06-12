@@ -6,6 +6,7 @@ const ChannelList = ({ token, setChannels, setChannelId }) => {
   const params = useParams();
   useEffect(() => {
     setChannelId(params["*"]);
+    // eslint-disable-next-line
   }, [params["*"]]);
   // useState(()=>console.log(channel),[channel]);
 
@@ -75,7 +76,9 @@ const ChannelList = ({ token, setChannels, setChannelId }) => {
               to={"/" + object.channel_id}
               key={object.channel_id}
               className="channel-box"
-              onClick={() => setChannelId(object.channel_id)}
+              onClick={() => {
+                setChannelId(object.channel_id);
+              }}
             >
               <p>{"# " + object.channel_name}</p>
             </Link>

@@ -6,8 +6,10 @@ import LogoImg from "../images/logo.png";
 import { Route, Routes, useParams } from "react-router-dom";
 import ChannelList from "./ChannelList";
 import MessageBox from "./MessageBox";
+import ErrorPage from "./ErrorPage";
+import SelectChannelPage from "./SelectChannelPage";
 
-const wsurl = "ws://localhost:3001";
+const wsurl = "ws://localhost:3002";
 
 const emptyObject = {
   reciever_id: null,
@@ -22,37 +24,41 @@ const ChatApp = ({ token, setToken }) => {
   const [state, setState] = useState(emptyObject);
   const [channels, setChannels] = useState([]);
   const [cid, setChannelId] = useState("");
+  const [messageHistory, setMessageHistory] = useState([]);
+  const [channelName, setChannelName] = useState("");
 
   const params = useParams();
   useEffect(() => {
     setChannelId(params["*"]);
+    // eslint-disable-next-line
   }, [params["*"]]);
 
   const handleMessage = (event) => {
+    // console.log(event);
     const _data = JSON.parse(event.data);
-    // console.log("Handle Message", _data);
+    console.log("Handle Message", _data);
     setData([_data, ...data]);
   };
 
-  useEffect(() => {
-    fetch("http://localhost:3001/getmessages", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bearer " + token.accessToken,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setData(data));
-    // eslint-disable-next-line
-  }, []);
+  // useEffect(() => {
+  //   fetch("http://localhost:3001/getmessages", {
+  //     method: "GET",
+  //     headers: {
+  //       Accept: "application/json",
+  //       Authorization: "Bearer " + token.accessToken,
+  //     },
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => setData(data));
+  //   // eslint-disable-next-line
+  // }, []);
 
   // useEffect(() => {
   //   console.log(data);
   //   // eslint-disable-next-line
   // }, [data.length]);
 
-  useWebSocket(wsurl, {
+  const { sendMessage, readyState } = useWebSocket(wsurl, {
     onOpen: () => {
       // console.log("websocket connection established.");
     },
@@ -189,12 +195,13 @@ const ChatApp = ({ token, setToken }) => {
           <div className="message-container-wrap">
             <div className="reciever-profile">
               <p>
-                <strong>#</strong> {state.reciever_name}
+                <strong>#</strong> {channelName ? channelName : "channels"}
               </p>
             </div>
             <div className="message-container">
               <Routes>
-                {/* <Route path="/" element={<MessageBox data={data} state={state}/>} /> */}
+                <Route path="/" element={<SelectChannelPage />} />
+                <Route path="/*" element={<ErrorPage />} />
                 {channels.map((object) => {
                   return (
                     <Route
@@ -207,6 +214,12 @@ const ChatApp = ({ token, setToken }) => {
                           token={token}
                           channel={object.channel_id}
                           state={state}
+                          sendMessage={sendMessage}
+                          readyState={readyState}
+                          messageHistory={messageHistory}
+                          setMessageHistory={setMessageHistory}
+                          channelName={object.channel_name}
+                          setChannelName={setChannelName}
                         />
                       }
                     />
