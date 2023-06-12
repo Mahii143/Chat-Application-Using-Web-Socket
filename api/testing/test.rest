@@ -1,5 +1,5 @@
 GET http://localhost:3001/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODU4NjEzMDd9.n95HR8NTJ5TGqGn3iiwdt0nKyjtx9we0iX-9SXWeypo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY0OTgxMDV9.dprfEk_RKkScWibTNgpVUH1jslqYFE5k1086eKVnD9Q
 
 ### 
 GET http://localhost:3001/users
@@ -12,7 +12,7 @@ POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-    "username":"mahir"
+    "username":"usman"
 }
 
 ###
@@ -58,4 +58,24 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiL
     "channel_id":"7898asubdasd2", 
     "content":"test 1", 
     "timestamp":1234567876543
+}
+
+###
+
+POST http://localhost:3002/create-channel
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY1NDcxNzV9.L7i7ILDP1xwAunbGWD_BtNOo0-af-yYSzo9GuA8-leA
+
+{
+    "channel_name":"test 2"
+}
+
+###
+
+POST http://localhost:3002/join-channel
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NDg0NTl9.X4h1M5C8bcNCk12NCRcIsM0zLr_254UtlyrokMzA8WE
+
+{
+    "channel_id":"a910c5fc-a419-4893-a486-ef152b5e3861"
 }
