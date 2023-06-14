@@ -1,6 +1,20 @@
 import React, { useEffect } from "react";
 import { ReadyState } from "react-use-websocket";
 
+const month = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 const MessageBox = ({
   token,
   data,
@@ -56,7 +70,7 @@ const MessageBox = ({
     }
     // eslint-disable-next-line
   }, [channel, readyState]);
-  
+
   useEffect(() => {
     setChannelName(channelName);
     // eslint-disable-next-line
@@ -74,6 +88,26 @@ const MessageBox = ({
                   (object.sender_id === state.sender_id ? "sender" : "reciever")
                 }
               >
+                <p className="sender-name">
+                  {object.sender_id !== state.sender_id
+                    ? object.sender_name
+                    : ""}{" "}
+                  <span className="time-of-msg">
+                    {" " +
+                      new Date(parseInt(object.timestamp)).getHours() +
+                      ":" +
+                      (new Date(parseInt(object.timestamp)).getMinutes() < 10
+                        ? "0"
+                        : "") +
+                      new Date(parseInt(object.timestamp)).getMinutes() +
+                      " " +
+                      month[
+                        new Date(parseInt(object.timestamp)).getMonth() - 1
+                      ] +
+                      " " +
+                      new Date(parseInt(object.timestamp)).getDate()}
+                  </span>
+                </p>
                 <p>
                   {" "}
                   {(object.sender_id === state.sender_id ? "" : "~ ") +
@@ -88,7 +122,7 @@ const MessageBox = ({
   } else {
     return (
       <div className="default-page">
-        <p>Say something...</p>
+        <p>Say something... &#9997;</p>
       </div>
     );
   }

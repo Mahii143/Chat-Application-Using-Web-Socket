@@ -1,4 +1,5 @@
 const Pool = require("pg").Pool;
+const InviteCode = require("./invitecode");
 const pool = new Pool({
   user: "admin",
   host: "localhost",
@@ -30,6 +31,27 @@ const getChannelsOfUser = (id) => {
   });
 };
 
+// getting participants of a channel
+const getUsersOfChannel = (body) => {
+  const { channel_id } = body;
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'SELECT part_user_id, part_role, channel_id FROM public."ChannelParticipants" WHERE channel_id = $1',
+      [channel_id],
+      (error, result) => {
+        if (error) reject("query error");
+        if (result && result.rows) {
+          resolve(result.rows);
+        } else {
+          reject(
+            new Error("Query result is undefined or missing rows property")
+          );
+        }
+      }
+    );
+  });
+};
+
 // checking user is part of channel
 const checkUserChannel = (user_id, channel_id) => {
   return new Promise(function (resolve, reject) {
@@ -37,7 +59,7 @@ const checkUserChannel = (user_id, channel_id) => {
       'SELECT EXISTS ( SELECT 1 FROM public."ChannelParticipants" WHERE part_user_id = $1 AND channel_id = $2 ) AS is_authorised',
       [user_id, channel_id],
       (error, result) => {
-        if (error) reject(error);
+        if (error) reject("query error");
         if (result && result.rows) {
           resolve(result.rows);
         } else {
@@ -57,7 +79,7 @@ const getMessagesOfChannel = (id) => {
       'SELECT message_id, channel_id, sender_id, content, timestamp FROM public."MessageHistory" WHERE channel_id = $1 ORDER BY timestamp DESC',
       [id],
       (error, result) => {
-        if (error) reject(error);
+        if (error) reject("query error 1");
         if (result && result.rows) {
           resolve(result.rows);
         } else {
@@ -142,9 +164,9 @@ const createChannel = (req) => {
     );
     req.body.channel_id = channel_id;
     req.body.part_role = "admin";
-    try{
+    try {
       await joinChannel(req);
-    } catch(error) {
+    } catch (error) {
       resolve(error);
     }
     resolve("channel successfully created");
@@ -171,14 +193,103 @@ const joinChannel = (req) => {
   });
 };
 
+// check admin or not
+const checkAdmin = (user_id, channel_id) => {
+  // 'SELECT EXISTS ( SELECT 1 FROM public."ChannelParticipants" WHERE part_user_id = $1 AND channel_id = $2 ) AS is_authorised',
+  const role = "admin";
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'SELECT EXISTS ( SELECT 1 FROM public."ChannelParticipants" WHERE part_user_id = $1 AND channel_id = $2 AND part_role = $3 ) AS is_authorised',
+      [user_id, channel_id, role],
+      (error, result) => {
+        if (error) reject("query error");
+        if (result && result.rows) {
+          resolve(result.rows);
+        } else {
+          reject(
+            new Error("Query result is undefined or missing rows property")
+          );
+        }
+      }
+    );
+  });
+};
+
+// creating an invite code
+const createInviteCode = (body) => {
+  const invite_id = uuid.v4();
+  const invite_code = InviteCode.generateUniqueCode();
+  const { channel_id } = body;
+  return new Promise(async function (resolve, reject) {
+    pool.query(
+      'INSERT INTO public."InviteCode" (invite_id, invite_code, channel_id) VALUES ($1, $2, $3)',
+      [invite_id, invite_code, channel_id],
+      (error, _) => {
+        if (error) reject(error);
+        resolve(JSON.stringify({ invite_code: invite_code }));
+      }
+    );
+  });
+};
+
+// get channel id from invite code
+
+const getInviteChannel = (body) => {
+  const { invite_code } = body;
+  return new Promise(function(resolve, reject) {
+    pool.query(
+      'SELECT channel_id FROM public."InviteCode" WHERE invite_code = $1',
+      [invite_code],
+      (error, result) => {
+        if (error) reject("query error");
+        if (result && result.rows) {
+          resolve(JSON.stringify(result.rows[0]));
+        } else {
+          reject(
+            new Error("Query result is undefined or missing rows property")
+          );
+        }
+      }
+    );
+  });
+}
+
+// get invite code from channel id
+const getInviteCode = (body) => {
+  const { channel_id } = body;
+  return new Promise(async function (resolve, reject) {
+    pool.query(
+      'SELECT invite_code FROM public."InviteCode" WHERE channel_id = $1',
+      [channel_id],
+      (error, result) => {
+        if (error) reject("query error");
+        if (result && result.rows) {
+          resolve(JSON.stringify(result.rows[0]));
+        } else {
+          reject(
+            new Error("Query result is undefined or missing rows property")
+          );
+        }
+      }
+    );
+  });
+};
+
+
+
 /****************** post methods ends ******************/
 
 module.exports = {
   getChannelsOfUser,
+  getUsersOfChannel,
   checkUserChannel,
   getMessagesOfChannel,
   getChannel,
   sendMessage,
   createChannel,
   joinChannel,
+  checkAdmin,
+  createInviteCode,
+  getInviteChannel,
+  getInviteCode,
 };

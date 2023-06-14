@@ -3,19 +3,20 @@ import useWebSocket from "react-use-websocket";
 import LogoutBtn from "./LogoutBtn";
 import { useEffect } from "react";
 import LogoImg from "../images/logo.png";
-import { Route, Routes, useParams } from "react-router-dom";
+import { Link, Route, Routes, useParams } from "react-router-dom";
 import ChannelList from "./ChannelList";
 import MessageBox from "./MessageBox";
-import ErrorPage from "./ErrorPage";
+// import ErrorPage from "./ErrorPage";
 import SelectChannelPage from "./SelectChannelPage";
+import ChannelOptions from "./ChannelOptions";
 
 const wsurl = "ws://localhost:3002";
 
 const emptyObject = {
-  reciever_id: null,
   sender_id: null,
   sender_name: null,
-  reciever_name: null,
+  // reciever_id: null,
+  // reciever_name: null,
 };
 
 const ChatApp = ({ token, setToken }) => {
@@ -26,6 +27,8 @@ const ChatApp = ({ token, setToken }) => {
   const [cid, setChannelId] = useState("");
   const [messageHistory, setMessageHistory] = useState([]);
   const [channelName, setChannelName] = useState("");
+  const [chlname, setChlname] = useState("");
+  const [chlnamejoin, setChlnamejoin] = useState("");
 
   const params = useParams();
   useEffect(() => {
@@ -40,24 +43,6 @@ const ChatApp = ({ token, setToken }) => {
     setData([_data, ...data]);
   };
 
-  // useEffect(() => {
-  //   fetch("http://localhost:3001/getmessages", {
-  //     method: "GET",
-  //     headers: {
-  //       Accept: "application/json",
-  //       Authorization: "Bearer " + token.accessToken,
-  //     },
-  //   })
-  //     .then((res) => res.json())
-  //     .then((data) => setData(data));
-  //   // eslint-disable-next-line
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log(data);
-  //   // eslint-disable-next-line
-  // }, [data.length]);
-
   const { sendMessage, readyState } = useWebSocket(wsurl, {
     onOpen: () => {
       // console.log("websocket connection established.");
@@ -71,19 +56,20 @@ const ChatApp = ({ token, setToken }) => {
 
   useEffect(() => {
     const endpointUser = "http://localhost:3001/user";
-    const endpointReceiver = "http://localhost:3001/receiver";
+    // const endpointReceiver = "http://localhost:3001/receiver";
 
-    const updateState = (userData, receiverData) => {
+    const updateState = (userData) => {
+      //receiverData) => {
       console.log("user data: ", userData);
-      console.log("receiver data: ", receiverData);
+      // console.log("receiver data: ", receiverData);
       console.log("update state", state);
       setState((prev) => {
         const newState = {
           ...prev,
           sender_id: userData[0].id,
           sender_name: userData[0].name,
-          reciever_id: receiverData[0].id,
-          reciever_name: receiverData[0].name,
+          // reciever_id: receiverData[0].id,
+          // reciever_name: receiverData[0].name,
         };
         console.log("Updated state:", newState);
         return newState;
@@ -106,21 +92,21 @@ const ChatApp = ({ token, setToken }) => {
 
         const userData = await userRes.json();
 
-        const receiverRes = await fetch(endpointReceiver, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: "Bearer " + token.accessToken,
-          },
-        });
+        // const receiverRes = await fetch(endpointReceiver, {
+        //   method: "GET",
+        //   headers: {
+        //     Accept: "application/json",
+        //     Authorization: "Bearer " + token.accessToken,
+        //   },
+        // });
 
-        if (!receiverRes.ok) {
-          throw new Error("Receiver not found!");
-        }
+        // if (!receiverRes.ok) {
+        //   throw new Error("Receiver not found!");
+        // }
 
-        const receiverData = await receiverRes.json();
+        // const receiverData = await receiverRes.json();
 
-        updateState(userData, receiverData);
+        updateState(userData); //, receiverData);
       } catch (error) {
         console.error(error);
       }
@@ -186,11 +172,40 @@ const ChatApp = ({ token, setToken }) => {
       <div className="main-container">
         <div className="message-wrap">
           <div className="channel-wrap-container">
-            <ChannelList
-              token={token}
-              setChannels={setChannels}
-              setChannelId={setChannelId}
-            />
+            <div className="channel-heading">
+              <Link to="../">
+              #Channels
+              </Link>
+              <Link to="/channel-options">
+                +
+              </Link>
+            </div>
+            <div className="channel-container">
+              <Routes>
+                <Route
+                  path="/*"
+                  element={
+                    <ChannelList
+                      token={token}
+                      setChannels={setChannels}
+                      setChannelId={setChannelId}
+                    />
+                  }
+                />
+                <Route
+                  path="/channel-options"
+                  element={
+                    <ChannelOptions
+                      token={token}
+                      chlname={chlname}
+                      setChlname={setChlname}
+                      chlnamejoin={chlnamejoin}
+                      setChlnamejoin={setChlnamejoin}
+                    />
+                  }
+                />
+              </Routes>
+            </div>
           </div>
           <div className="message-container-wrap">
             <div className="reciever-profile">
@@ -200,8 +215,8 @@ const ChatApp = ({ token, setToken }) => {
             </div>
             <div className="message-container">
               <Routes>
-                <Route path="/" element={<SelectChannelPage />} />
-                <Route path="/*" element={<ErrorPage />} />
+                <Route path="/*" element={<SelectChannelPage />} />
+                {/* <Route path="/*" element={<ErrorPage />} /> */}
                 {channels.map((object) => {
                   return (
                     <Route

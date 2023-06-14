@@ -3,7 +3,7 @@ import React from 'react'
 const SelectChannelPage = () => {
   return (
     <div className='default-page'>
-        <p>Select a channel &#9997;</p>
+        <p>Create, Join or Select a Channel &#10024;</p>
     </div>
   )
 }

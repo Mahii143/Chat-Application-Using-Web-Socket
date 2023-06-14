@@ -14,7 +14,7 @@ const ChannelList = ({ token, setChannels, setChannelId }) => {
     const fetchData = async () => {
       try {
         const endpointChannelParticipants =
-          "http://localhost:3002/channel-participants";
+          "http://localhost:3002/channel-participating";
         const endpointGetChannel = "http://localhost:3002/get-channel";
 
         const responseChannelParticipants = await fetch(
@@ -68,23 +68,20 @@ const ChannelList = ({ token, setChannels, setChannelId }) => {
 
   return (
     <>
-      <h3>#Channels</h3>
-      <div className="channel-container">
-        {channel.map((object) => {
-          return (
-            <Link
-              to={"/" + object.channel_id}
-              key={object.channel_id}
-              className="channel-box"
-              onClick={() => {
-                setChannelId(object.channel_id);
-              }}
-            >
-              <p>{"# " + object.channel_name}</p>
-            </Link>
-          );
-        })}
-      </div>
+      {channel.map((object) => {
+        return (
+          <Link
+            to={"/" + object.channel_id}
+            key={object.channel_id}
+            className="channel-box"
+            onClick={() => {
+              setChannelId(object.channel_id);
+            }}
+          >
+            <p>{"# " + object.channel_name}</p>
+          </Link>
+        );
+      })}
     </>
   );
 };

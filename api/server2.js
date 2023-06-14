@@ -23,7 +23,7 @@ const clients = [];
 
 const users = [
   {
-    id: "maoisxainsca",
+    id: "mahir143",
     name: "mahir",
   },
   {
@@ -91,7 +91,7 @@ wapp.on("connection", (socket) => {
  *  What are all the channels a user subscribed in
  */
 
-app.get("/channel-participants", authenticateToken, (req, res) => {
+app.get("/channel-participating", authenticateToken, (req, res) => {
   const authorisedUser = users.filter((user) => user.name === req.user.name);
   if (authorisedUser.length === 0) return res.sendStatus(403);
   const id = users.find((user) => user.name === req.user.name).id; // user id
@@ -100,6 +100,34 @@ app.get("/channel-participants", authenticateToken, (req, res) => {
     .getChannelsOfUser(id)
     .then((response) => {
       res.status(200).send(response);
+    })
+    .then((error) => {
+      res.status(500).send(error);
+    });
+});
+
+/**  Getting channel data from table using User ID ends */
+
+/**
+ *  Getting all channel participants data from table using channel id starts
+ *  What are all the users subscribed to the channel
+ */
+
+app.post("/channel-participants", authenticateToken, (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+  console.log(req.body);
+  message2
+    .getUsersOfChannel(req.body)
+    .then((response) => {
+      console.log("response", response);
+      let participants = [];
+      response.forEach((participant) => {
+        const obj = users.find((user) => user.id === participant.part_user_id);
+        if (obj) participants.push(obj);
+      });
+      console.log("participants", participants);
+      res.status(200).send(participants);
     })
     .then((error) => {
       res.status(500).send(error);
@@ -124,7 +152,24 @@ app.post("/channel-messages", authenticateToken, async (req, res) => {
 
     if (!isAuthorised) return res.sendStatus(403);
 
-    const messages = await message2.getMessagesOfChannel(channel_id);
+    let messages = await message2.getMessagesOfChannel(channel_id);
+    console.log(messages);
+    try {
+      messages = messages.map((message) => {
+        const sender = users.find((user) => user.id === message.sender_id);
+        if (sender) {
+          message.sender_name = sender.name;
+        } else {
+          message.sender_name = "Unknown";
+          console.error(`No user found for sender_id: ${message.sender_id}`);
+        }
+        return message;
+      });
+    } catch (error) {
+      console.error("Error occurred during message mapping:", error);
+      // Handle the error and send an appropriate response
+      // res.status(500).send("Internal server error");
+    }
     res.status(200).send(messages);
   } catch (error) {
     res.status(500).send(error);
@@ -161,20 +206,26 @@ app.post("/get-channel", authenticateToken, async (req, res) => {
 app.post("/send-message", authenticateToken, async (req, res) => {
   const authorisedUser = users.filter((user) => user.name === req.user.name);
   if (authorisedUser.length === 0) return res.sendStatus(403);
-  const user_id = users.find((user) => user.name === req.user.name).id;
-  req.user.id = user_id;
+  req.user = users.find((user) => user.name === req.user.name);
   // console.log(req.user);
   try {
     const response = await message2.sendMessage(req);
     if (channelsAndClients[req.body.channel_id]) {
       const clients = channelsAndClients[req.body.channel_id];
-      const message = response; // Replace with your actual message
+      let message = JSON.parse(response); // Replace with your actual message
 
+      // console.log('after changing',message);
       clients.forEach((client) => {
         const { socket } = client;
         if (socket.readyState === 1) {
-          socket.send(message);
-          console.log(`Broadcasted ${message} to Client ${client.uid}`);
+          console.log("sender details", req.user.name);
+          message = { sender_name: req.user.name, ...message };
+          console.log("After adding sender_name:", message);
+          socket.send(JSON.stringify(message));
+
+          console.log(
+            `Broadcasted ${JSON.stringify(message)} to Client ${client.uid}`
+          );
         } else {
           console.log(`WebSocket of Client ${client.uid} is not open`);
         }
@@ -193,7 +244,7 @@ app.post("/send-message", authenticateToken, async (req, res) => {
 app.post("/create-channel", authenticateToken, async (req, res) => {
   const authorisedUser = users.filter((user) => user.name === req.user.name);
   if (authorisedUser.length === 0) return res.sendStatus(403);
-  req.user.id = users.find( (user) => user.name === req.user.name ).id;
+  req.user.id = users.find((user) => user.name === req.user.name).id;
   try {
     const response = await message2.createChannel(req);
     return res.status(200).send(response);
@@ -203,21 +254,77 @@ app.post("/create-channel", authenticateToken, async (req, res) => {
 });
 /**  API for creating a channel ends */
 
-/**  API for joining a channel ends */
+/**  API for creating a invite code starts */
 
-app.post('/join-channel', authenticateToken, async (req, res) => {
+app.post("/create-invite", authenticateToken, async (req, res) => {
   const authorisedUser = users.filter((user) => user.name === req.user.name);
   if (authorisedUser.length === 0) return res.sendStatus(403);
-  req.user.id = users.find( (user) => user.name === req.user.name ).id;
+  user_id = users.find((user) => user.name === req.user.name).id;
+
+  try {
+    const auth = await message2.checkAdmin(user_id, req.body.channel_id);
+    const { is_authorised } = auth[0];
+
+    if (!is_authorised) res.status(403).send("not an admin");
+
+    const response = await message2.createInviteCode(req.body);
+
+    console.log(response);
+    res.status(200).send(response);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**  API for creating a invite code ends */
+
+/**  API for getting available invite code for a channel starts */
+
+app.post("/get-invite", authenticateToken, async (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+
+  try {
+    const response = await message2.getInviteCode(req.body);
+    console.log(response);
+    res.status(200).send(response);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**  API for getting available invite code for a channel ends */
+
+/**  API for getting available channel for the invite code starts */
+
+app.post("/get-invited-channel", authenticateToken, async (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+
+  try {
+    const response = await message2.getInviteChannel(req.body);
+    console.log(response);
+    res.status(200).send(response);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**  API for getting available channel for the invite code ends */
+
+/**  API for joining a channel ends */
+
+app.post("/join-channel", authenticateToken, async (req, res) => {
+  const authorisedUser = users.filter((user) => user.name === req.user.name);
+  if (authorisedUser.length === 0) return res.sendStatus(403);
+  req.user.id = users.find((user) => user.name === req.user.name).id;
 
   try {
     const response = await message2.joinChannel(req);
     return res.status(200).send(response);
-  }
-  catch(error) {
+  } catch (error) {
     return res.status(500).send(error);
   }
-
 });
 
 /**  API for joining a channel ends */

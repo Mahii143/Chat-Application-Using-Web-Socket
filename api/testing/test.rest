@@ -12,7 +12,7 @@ POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-    "username":"usman"
+    "username":"mahir"
 }
 
 ###
@@ -24,10 +24,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiL
 ###
 POST http://localhost:3002/channel-messages
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODYyODk3OTN9.6TsrsFM4tVvSgYuCSw2l6FxmpS5v_w6Lgq8U7qnegMo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NjA2NTF9.8PiocLDa8KXYIBdkLfloXoyF2dw_XefA1Ww6vitbOWM
 
 {
-    "channel_id" : "7898asubdasd"
+    "channel_id" : "e1e7d9fe-17ba-49c8-8a6d-fbe6749e5e0a"
 }
 
 ###
@@ -37,15 +37,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiL
 
 {
     "channel_id" : "7898asubdasd"
-}
-
-###
-
-POST link
-Content-Type: application/json
-
-{
-    "name":"mahir"
 }
 
 ###
@@ -64,18 +55,54 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiL
 
 POST http://localhost:3002/create-channel
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY1NDcxNzV9.L7i7ILDP1xwAunbGWD_BtNOo0-af-yYSzo9GuA8-leA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY1NjA2MTR9.moXvZEF6qieKFXvF6JKLpmDF-Rmg3RLIqrJjHl9RlzA
 
 {
-    "channel_name":"test 2"
+    "channel_name":"Mahir testing channel 1"
 }
 
 ###
 
 POST http://localhost:3002/join-channel
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NDg0NTl9.X4h1M5C8bcNCk12NCRcIsM0zLr_254UtlyrokMzA8WE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NjA2NTF9.8PiocLDa8KXYIBdkLfloXoyF2dw_XefA1Ww6vitbOWM
 
 {
-    "channel_id":"a910c5fc-a419-4893-a486-ef152b5e3861"
+    "channel_id":""
+}
+###
+
+POST http://localhost:3002/channel-participants
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NjA2NTF9.8PiocLDa8KXYIBdkLfloXoyF2dw_XefA1Ww6vitbOWM
+
+{
+    "channel_id":"e1e7d9fe-17ba-49c8-8a6d-fbe6749e5e0a"
+}
+
+###
+POST http://localhost:3002/create-invite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY2NzkzNTV9.rNn0UgUdzDEjn2KCj-CgaLPE52-P8AonQkc3JSsSjZU
+
+{
+    "channel_id":"490f2fee-17b2-48cf-aae7-91741c00b354"
+}
+
+###
+POST http://localhost:3002/get-invite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY2NzkzNTV9.rNn0UgUdzDEjn2KCj-CgaLPE52-P8AonQkc3JSsSjZU
+
+{
+    "channel_id":"e1e7d9fe-17ba-49c8-8a6d-fbe6749e5e0a"
+}
+
+###
+POST http://localhost:3002/get-invited-channel
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY2NzkzNTV9.rNn0UgUdzDEjn2KCj-CgaLPE52-P8AonQkc3JSsSjZU
+
+{
+    "invite_code":"mUXFZw"
 }
