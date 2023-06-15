@@ -10,12 +10,28 @@ const pool = new Pool({
 const uuid = require("uuid");
 
 /****************** get methods starts ******************/
+// getting all users
+const getUsers = () => {
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'SELECT id, name, password FROM public."User"',
+      (error, result) => {
+        if (error) reject("query error");
+        if (result && result.rows) resolve(result.rows);
+        else
+          reject(
+            new Error("Query result is undefined or missing rows property")
+          );
+      }
+    );
+  });
+};
 
 //getting all channels of a userid
 const getChannelsOfUser = (id) => {
   return new Promise(function (resolve, reject) {
     pool.query(
-      'SELECT part_id, part_user_id, part_role, channel_id FROM public."ChannelParticipants" WHERE part_user_id = $1',
+      'SELECT DISTINCT part_id, part_user_id, part_role, channel_id FROM public."ChannelParticipants" WHERE part_user_id = $1',
       [id],
       (error, result) => {
         if (error) reject(error);
@@ -116,6 +132,23 @@ const getChannel = (id) => {
 
 /****************** post methods starts ****************/
 
+// creating an user
+const createUser = (body) => {
+  const id = uuid.v4();
+  const { name, password } = body;
+
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'INSERT INTO public."User" (id, name, password) VALUES ($1, $2, $3)',
+      [id, name, password],
+      (error, result) => {
+        if (error) reject(error);
+        resolve("user created successfully");
+      }
+    );
+  });
+};
+
 // sending a message to db
 const sendMessage = (req) => {
   return new Promise(function (resolve, reject) {
@@ -180,14 +213,25 @@ const joinChannel = (req) => {
   const channel_id = req.body.channel_id;
   const part_role = req.body.part_role ? req.body.part_role : "member";
 
-  console.log(req.body);
+  console.log("joining channel", req.body);
   return new Promise(function (resolve, reject) {
+    if(channel_id === '') reject('no channel found');
     pool.query(
-      'INSERT INTO public."ChannelParticipants"( part_id, part_user_id, part_role, channel_id) VALUES ($1, $2, $3, $4)',
-      [part_id, part_user_id, part_role, channel_id],
-      (error, _) => {
+      'SELECT EXISTS ( SELECT 1 FROM public."ChannelParticipants" WHERE part_user_id = $1 AND channel_id = $2 ) AS is_exist',
+      [part_user_id, channel_id],
+      (error, result) => {
         if (error) reject("query error");
-        resolve("joined the channel successfully");
+        if (result.rows[0].is_exist)
+          reject("user already a member of the channel");
+        console.log(result.rows[0].is_exist);
+        pool.query(
+          'INSERT INTO public."ChannelParticipants"( part_id, part_user_id, part_role, channel_id) VALUES ($1, $2, $3, $4)',
+          [part_id, part_user_id, part_role, channel_id],
+          (error, _) => {
+            if (error) reject("query error");
+            resolve("joined the channel successfully");
+          }
+        );
       }
     );
   });
@@ -236,7 +280,7 @@ const createInviteCode = (body) => {
 
 const getInviteChannel = (body) => {
   const { invite_code } = body;
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
       'SELECT channel_id FROM public."InviteCode" WHERE invite_code = $1',
       [invite_code],
@@ -252,7 +296,7 @@ const getInviteChannel = (body) => {
       }
     );
   });
-}
+};
 
 // get invite code from channel id
 const getInviteCode = (body) => {
@@ -275,16 +319,16 @@ const getInviteCode = (body) => {
   });
 };
 
-
-
 /****************** post methods ends ******************/
 
 module.exports = {
+  getUsers,
   getChannelsOfUser,
   getUsersOfChannel,
   checkUserChannel,
   getMessagesOfChannel,
   getChannel,
+  createUser,
   sendMessage,
   createChannel,
   joinChannel,

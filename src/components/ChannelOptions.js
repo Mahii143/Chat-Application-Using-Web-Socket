@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ChannelOptions = ({
   token,
@@ -7,6 +7,7 @@ const ChannelOptions = ({
   chlnamejoin,
   setChlnamejoin,
 }) => {
+  const [invCode, setInvCode] = useState("");
   const createChannel = async (e) => {
     e.preventDefault();
     if (chlname === null) return;
@@ -28,12 +29,23 @@ const ChannelOptions = ({
       console.log(err.message);
     }
   };
-  const joinChannel = async (e) => {
-    e.preventDefault();
-    if (chlnamejoin === null) return;
-    const endpointJoin = "http://localhost:3002/join-channel";
+
+  useEffect(
+    () => console.log("after calling code", chlnamejoin),
+    [chlnamejoin]
+  );
+  const getChannelId = async () => {
+    // e.preventDefault();
+
+    if (invCode === null || invCode === "" || invCode.length < 6) {
+      alert("Invalid invite code");
+      return null;
+    }
+
+    const endpointChannelId = "http://localhost:3002/get-invited-channel";
+
     try {
-      await fetch(endpointJoin, {
+      const response = await fetch(endpointChannelId, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -41,12 +53,54 @@ const ChannelOptions = ({
           Authorization: "Bearer " + token.accessToken,
         },
         body: JSON.stringify({
-          channel_id: chlnamejoin,
+          invite_code: invCode,
         }),
       });
-      setChlnamejoin("");
+
+      try {
+        const data = await response.json();
+        setInvCode("");
+        return data.channel_id;
+      } catch (err) {
+        throw new Error("No channel found");
+      }
     } catch (err) {
       console.log(err.message);
+      return null;
+    }
+  };
+
+  const joinChannel = async (e) => {
+    e.preventDefault();
+
+    const channelId = await getChannelId(e);
+
+    if (channelId === null) {
+      alert("No channel ID");
+      return;
+    }
+
+    const endpointJoin = "http://localhost:3002/join-channel";
+
+    try {
+      const resp = await fetch(endpointJoin, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token.accessToken,
+        },
+        body: JSON.stringify({
+          channel_id: channelId,
+        }),
+      });
+
+      if (!resp.ok) {
+        alert("Error while joining");
+        return;
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
   return (
@@ -81,9 +135,9 @@ const ChannelOptions = ({
             type="text"
             placeholder="invite code"
             name="chlnamejoin"
-            value={chlnamejoin}
+            value={invCode}
             onChange={(e) => {
-              setChlnamejoin(e.target.value);
+              setInvCode(e.target.value);
             }}
           ></input>
         </label>

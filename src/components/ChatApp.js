@@ -29,6 +29,7 @@ const ChatApp = ({ token, setToken }) => {
   const [channelName, setChannelName] = useState("");
   const [chlname, setChlname] = useState("");
   const [chlnamejoin, setChlnamejoin] = useState("");
+  const [code, setCode] = useState("");
 
   const params = useParams();
   useEffect(() => {
@@ -55,7 +56,7 @@ const ChatApp = ({ token, setToken }) => {
   });
 
   useEffect(() => {
-    const endpointUser = "http://localhost:3001/user";
+    const endpointUser = "http://localhost:3002/sender";
     // const endpointReceiver = "http://localhost:3001/receiver";
 
     const updateState = (userData) => {
@@ -66,8 +67,8 @@ const ChatApp = ({ token, setToken }) => {
       setState((prev) => {
         const newState = {
           ...prev,
-          sender_id: userData[0].id,
-          sender_name: userData[0].name,
+          sender_id: userData.id,
+          sender_name: userData.name,
           // reciever_id: receiverData[0].id,
           // reciever_name: receiverData[0].name,
         };
@@ -157,6 +158,36 @@ const ChatApp = ({ token, setToken }) => {
     console.log(state);
   }, [state]);
 
+  const createCode = async () => {
+    try {
+      const response = await fetch("http://localhost:3002/create-invite", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token.accessToken,
+        },
+        body: JSON.stringify({
+          channel_id: cid,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Request failed with status: " + response.status);
+      }
+      console.log("response code", response);
+      try {
+        const data = await response.json();
+
+        if (data) setCode(data.invite_code);
+      } catch (err) {
+        throw new Error(err);
+      }
+    } catch (error) {
+      alert(error.message);
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <nav>
@@ -173,12 +204,8 @@ const ChatApp = ({ token, setToken }) => {
         <div className="message-wrap">
           <div className="channel-wrap-container">
             <div className="channel-heading">
-              <Link to="../">
-              #Channels
-              </Link>
-              <Link to="/channel-options">
-                +
-              </Link>
+              <Link to="../">#Channels</Link>
+              <Link to="/channel-options">+</Link>
             </div>
             <div className="channel-container">
               <Routes>
@@ -210,8 +237,21 @@ const ChatApp = ({ token, setToken }) => {
           <div className="message-container-wrap">
             <div className="reciever-profile">
               <p>
-                <strong>#</strong> {channelName ? channelName : "channels"}
+                <strong>#</strong> {channelName ? channelName : "channels"}{" "}
+                <span className="channel-invite-code">{code ? code : ""}</span>
               </p>
+              <div className="create-channel-code">
+                {code ? (
+                  ""
+                ) : (
+                  <button
+                    className="create-channel-code-btn"
+                    onClick={createCode}
+                  >
+                    Get Code
+                  </button>
+                )}
+              </div>
             </div>
             <div className="message-container">
               <Routes>
@@ -235,6 +275,8 @@ const ChatApp = ({ token, setToken }) => {
                           setMessageHistory={setMessageHistory}
                           channelName={object.channel_name}
                           setChannelName={setChannelName}
+                          code={code}
+                          setCode={setCode}
                         />
                       }
                     />

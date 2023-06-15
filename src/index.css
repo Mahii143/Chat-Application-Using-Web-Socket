@@ -186,7 +186,7 @@ nav {
   height: 10%;
   display: flex;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   position: relative;
   z-index: 0;
@@ -196,9 +196,12 @@ nav {
 }
 
 .reciever-profile p {
-  width: 100%;
+  width: 80%;
   text-align: left;
   margin-left: 3rem;
+}
+.reciever-profile .create-channel-code {
+  width: 20%;
 }
 
 .message-wrap {
@@ -385,7 +388,8 @@ button:hover {
 }
 
 .create-channel-form,
-.join-channel-form {
+.join-channel-form,
+.get-code {
   width: 100%;
   height: 7rem;
   display: flex;
@@ -414,7 +418,9 @@ button:hover {
 }
 
 .create-channel-form button,
-.join-channel-form button {
+.join-channel-form button,
+.create-channel-code-btn
+{
   all: unset;
   padding: 0.45rem 0.8rem;
   background-color: var(--lightblue);
@@ -433,4 +439,9 @@ button:hover {
 
 .sender {
   align-items: flex-end;
+}
+
+.channel-invite-code {
+  text-transform: none;
+  color:var(--magenda);
 }

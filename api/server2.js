@@ -21,7 +21,7 @@ const httpServer = app.listen(PORT, () => {
 const wapp = new WebSocket({ server: httpServer });
 const clients = [];
 
-const users = [
+const users2 = [
   {
     id: "mahir143",
     name: "mahir",
@@ -31,6 +31,51 @@ const users = [
     name: "usman",
   },
 ];
+
+/** user CRUD operation (create user, get all users) */
+
+/** */
+let users = [];
+const getusers = async function () {
+  try {
+    const response = await message2.getUsers();
+    users = [...response];
+    console.log(users);
+  } catch (err) {}
+};
+
+(async () => await getusers())();
+
+// console.log("users from server", users2);
+
+app.get("/users", async (req, res) => {
+  try {
+    const response = await message2.getUsers();
+    console.log(response);
+    res.status(200).send(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+app.get("/sender", authenticateToken, (req, res) => {
+  const user = users.find((user) => user.name === req.user.name);
+  console.log("user send");
+  if (user === null) return res.sendStatus(404);
+  res.json(user);
+});
+
+app.post("/user", async (req, res) => {
+  try {
+    const response = await message2.createUser(req.body);
+    console.log(response);
+    res.status(200).send(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
 
 /**  Web socket starts **/
 const channelsAndClients = {};
@@ -265,7 +310,7 @@ app.post("/create-invite", authenticateToken, async (req, res) => {
     const auth = await message2.checkAdmin(user_id, req.body.channel_id);
     const { is_authorised } = auth[0];
 
-    if (!is_authorised) res.status(403).send("not an admin");
+    if (!is_authorised) return res.status(403).send("not an admin");
 
     const response = await message2.createInviteCode(req.body);
 
@@ -334,60 +379,60 @@ app.post("/join-channel", authenticateToken, async (req, res) => {
  * he/she must enter either one of the above names
  * or else ill return 404 error
  */
-app.get("/user", authenticateToken, (req, res) => {
-  const user = users.filter((user) => user.name === req.user.name);
-  if (user.length === 0) return res.sendStatus(404);
-  res.json(user);
-});
+// app.get("/user", authenticateToken, (req, res) => {
+//   const user = users.filter((user) => user.name === req.user.name);
+//   if (user.length === 0) return res.sendStatus(404);
+//   res.json(user);
+// });
 
-app.get("/getmessages", authenticateToken, (_, res) => {
-  message
-    .getMessages()
-    .then((response) => {
-      res.status(200).send(response);
-    })
-    .then((error) => {
-      res.status(500).send(error);
-    });
-});
+// app.get("/getmessages", authenticateToken, (_, res) => {
+//   message
+//     .getMessages()
+//     .then((response) => {
+//       res.status(200).send(response);
+//     })
+//     .then((error) => {
+//       res.status(500).send(error);
+//     });
+// });
 
-app.get("/reciever", authenticateToken, (req, res) => {
-  const authorisedUser = users.filter((user) => user.name === req.user.name);
-  if (authorisedUser.length === 0) return res.sendStatus(403);
-  res.json(users.filter((user) => user.name !== req.user.name));
-});
+// app.get("/reciever", authenticateToken, (req, res) => {
+//   const authorisedUser = users.filter((user) => user.name === req.user.name);
+//   if (authorisedUser.length === 0) return res.sendStatus(403);
+//   res.json(users.filter((user) => user.name !== req.user.name));
+// });
 
-app.post("/send", (req, res) => {
-  message
-    .createMessage(req.body)
-    .then((response) => {
-      console.log(`Initiating websocket`);
-      wapp.clients.forEach((client) => {
-        if (client.readyState === 1) {
-          client.send(response);
-          console.log(`Broadcasted ${response}`);
-        } else {
-          console.log(`WebSocket of ${client} is not open`);
-        }
-      });
-      return res.status(200).send("success"); // Return the response here
-    })
-    .catch((error) => {
-      console.log("Error in ", error);
-      res.status(500).send("Internal server error");
-    });
-});
+// app.post("/send", (req, res) => {
+//   message
+//     .createMessage(req.body)
+//     .then((response) => {
+//       console.log(`Initiating websocket`);
+//       wapp.clients.forEach((client) => {
+//         if (client.readyState === 1) {
+//           client.send(response);
+//           console.log(`Broadcasted ${response}`);
+//         } else {
+//           console.log(`WebSocket of ${client} is not open`);
+//         }
+//       });
+//       return res.status(200).send("success"); // Return the response here
+//     })
+//     .catch((error) => {
+//       console.log("Error in ", error);
+//       res.status(500).send("Internal server error");
+//     });
+// });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username } = req.body;
+  const authorisedUser = users.find((u) => u.name === username);
+  if (!authorisedUser) {
+    return res.status(403).send("forbidden");
+  }
   const user = {
     name: username,
   };
-
-  const authorisedUser = users.filter((u) => u.name === username);
-  if (authorisedUser.length === 0) {
-    return res.sendStatus(403);
-  }
+  console.log("available users: ", users, "authorised", authorisedUser);
   const accessToken = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN);
   const refreshToken = jwt.sign(user, process.env.REFRESH_SECRET_TOKEN);
 

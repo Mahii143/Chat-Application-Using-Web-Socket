@@ -1,20 +1,7 @@
 import React, { useEffect } from "react";
 import { ReadyState } from "react-use-websocket";
+import dateFormat from "dateformat";
 
-const month = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
 const MessageBox = ({
   token,
   data,
@@ -27,7 +14,42 @@ const MessageBox = ({
   setMessageHistory,
   channelName,
   setChannelName,
+  code,
+  setCode,
 }) => {
+  useEffect(() => {
+    const getCode = async () => {
+      try {
+        const response = await fetch("http://localhost:3002/get-invite", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token.accessToken,
+          },
+          body: JSON.stringify({
+            channel_id: channel,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Request failed with status: " + response.status);
+        }
+        console.log("response code", response);
+        try {
+          const data = await response.json();
+
+          if (data) setCode(data.invite_code);
+        } catch (err) {
+          setCode("");
+          throw new Error("No invite code found for channel");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getCode();
+    // eslint-disable-next-line
+  }, [channel]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,6 +102,12 @@ const MessageBox = ({
     return (
       <>
         {data.map((object, index) => {
+          const timestamp = dateFormat(
+            new Date(parseInt(object.timestamp)),
+            "hh:MM TT dS mmm"
+          );
+          // console.log(timestamp);
+          // console.log(dateFormat(new Date(parseInt(object.timestamp)), "HH:MM TT dd mmm"));
           return (
             <div className="message-box" key={index}>
               <div
@@ -92,21 +120,7 @@ const MessageBox = ({
                   {object.sender_id !== state.sender_id
                     ? object.sender_name
                     : ""}{" "}
-                  <span className="time-of-msg">
-                    {" " +
-                      new Date(parseInt(object.timestamp)).getHours() +
-                      ":" +
-                      (new Date(parseInt(object.timestamp)).getMinutes() < 10
-                        ? "0"
-                        : "") +
-                      new Date(parseInt(object.timestamp)).getMinutes() +
-                      " " +
-                      month[
-                        new Date(parseInt(object.timestamp)).getMonth() - 1
-                      ] +
-                      " " +
-                      new Date(parseInt(object.timestamp)).getDate()}
-                  </span>
+                  <span className="time-of-msg">{" " + timestamp}</span>
                 </p>
                 <p>
                   {" "}

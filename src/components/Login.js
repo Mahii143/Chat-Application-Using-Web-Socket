@@ -5,7 +5,7 @@ const Login = ({ setToken }) => {
   const [username, setUsername] = useState("");
 
   const getToken = async (username) => {
-    const endpoint = "http://localhost:3001/login";
+    const endpoint = "http://localhost:3002/login";
     try {
       await fetch(endpoint, {
         method: "POST",
@@ -23,6 +23,7 @@ const Login = ({ setToken }) => {
         })
         .then((data) => setToken({ ...data }));
     } catch (error) {
+      alert(error);
       console.log(error.message);
     }
   };
