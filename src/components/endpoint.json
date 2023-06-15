@@ -1,4 +1,4 @@
 {
   "endpoint": "https://chat-api-d9bd.onrender.com/",
-  "wsurl": "ws://chat-api-d9bd.onrender.com"
+  "wsurl": "wss://chat-api-d9bd.onrender.com"
 }
