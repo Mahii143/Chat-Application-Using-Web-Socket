@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { ReadyState } from "react-use-websocket";
 import dateFormat from "dateformat";
+import url from "./endpoint";
 
 const MessageBox = ({
   token,
@@ -20,7 +21,8 @@ const MessageBox = ({
   useEffect(() => {
     const getCode = async () => {
       try {
-        const response = await fetch("http://localhost:3002/get-invite", {
+        const endpointGetInv = url.endpoint + "get-invite";
+        const response = await fetch(endpointGetInv, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -53,7 +55,8 @@ const MessageBox = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3002/channel-messages", {
+        const endpointChnlMsg = url.endpoint + "channel-messages";
+        const response = await fetch(endpointChnlMsg, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

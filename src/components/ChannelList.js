@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import url from "./endpoint";
 
 const ChannelList = ({ token, setChannels, setChannelId }) => {
   const [channel, setChannel] = useState([]);
@@ -9,13 +10,13 @@ const ChannelList = ({ token, setChannels, setChannelId }) => {
     // eslint-disable-next-line
   }, [params["*"]]);
   // useState(()=>console.log(channel),[channel]);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const endpointChannelParticipants =
-          "http://localhost:3002/channel-participating";
-        const endpointGetChannel = "http://localhost:3002/get-channel";
+          url.endpoint + "channel-participating";
+        const endpointGetChannel = url.endpoint + "get-channel";
 
         const responseChannelParticipants = await fetch(
           endpointChannelParticipants,

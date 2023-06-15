@@ -9,8 +9,10 @@ import MessageBox from "./MessageBox";
 // import ErrorPage from "./ErrorPage";
 import SelectChannelPage from "./SelectChannelPage";
 import ChannelOptions from "./ChannelOptions";
+import url from "./endpoint";
 
-const wsurl = "ws://localhost:3002";
+
+const wsurl = url.wsurl;
 
 const emptyObject = {
   sender_id: null,
@@ -56,7 +58,7 @@ const ChatApp = ({ token, setToken }) => {
   });
 
   useEffect(() => {
-    const endpointUser = "http://localhost:3002/sender";
+    const endpointUser = url.endpoint + "sender";
     // const endpointReceiver = "http://localhost:3001/receiver";
 
     const updateState = (userData) => {
@@ -125,7 +127,7 @@ const ChatApp = ({ token, setToken }) => {
     e.preventDefault();
     if (content === "" || cid === null) return;
     // const endpointSend = "http://localhost:3001/send";
-    const endpointSend = "http://localhost:3002/send-message";
+    const endpointSend = url.endpoint + "send-message";
     try {
       await fetch(endpointSend, {
         method: "POST",
@@ -160,7 +162,8 @@ const ChatApp = ({ token, setToken }) => {
 
   const createCode = async () => {
     try {
-      const response = await fetch("http://localhost:3002/create-invite", {
+      const endpointCreateInv = url.endpoint + "create-invite"
+      const response = await fetch(endpointCreateInv, {
         method: "POST",
         headers: {
           Accept: "application/json",

@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
+import url from "./endpoint";
 
-const ChannelOptions = ({
-  token,
-  chlname,
-  setChlname,
-  chlnamejoin,
-  setChlnamejoin,
-}) => {
+const ChannelOptions = ({ token, chlname, setChlname, chlnamejoin }) => {
   const [invCode, setInvCode] = useState("");
   const createChannel = async (e) => {
     e.preventDefault();
     if (chlname === null) return;
-    const endpointCreate = "http://localhost:3002/create-channel";
+    const endpointCreate = url.endpoint + "create-channel";
     try {
       await fetch(endpointCreate, {
         method: "POST",
@@ -42,7 +37,7 @@ const ChannelOptions = ({
       return null;
     }
 
-    const endpointChannelId = "http://localhost:3002/get-invited-channel";
+    const endpointChannelId = url.endpoint + "get-invited-channel";
 
     try {
       const response = await fetch(endpointChannelId, {
@@ -80,7 +75,7 @@ const ChannelOptions = ({
       return;
     }
 
-    const endpointJoin = "http://localhost:3002/join-channel";
+    const endpointJoin = url.endpoint + "join-channel";
 
     try {
       const resp = await fetch(endpointJoin, {

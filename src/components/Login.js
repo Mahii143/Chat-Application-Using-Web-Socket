@@ -1,11 +1,12 @@
 import React from "react";
 import { useState } from "react";
+import url from "./endpoint";
 
 const Login = ({ setToken }) => {
   const [username, setUsername] = useState("");
 
   const getToken = async (username) => {
-    const endpoint = "http://localhost:3002/login";
+    const endpoint = url.endpoint + "login";
     try {
       await fetch(endpoint, {
         method: "POST",
