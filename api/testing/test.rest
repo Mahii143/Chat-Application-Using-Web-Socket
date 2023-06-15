@@ -8,11 +8,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iL
 
 ###
 
-POST http://localhost:3001/login
+POST http://localhost:3002/login
 Content-Type: application/json
 
 {
-    "username":"mahir"
+    "username":"hi"
 }
 
 ###
@@ -68,7 +68,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidXNtYW4iLCJpYXQiOjE2ODY1NjA2NTF9.8PiocLDa8KXYIBdkLfloXoyF2dw_XefA1Ww6vitbOWM
 
 {
-    "channel_id":""
+    "channel_id":"8dd046a3-0b57-46cc-9dac-43dd594b7cd6"
 }
 ###
 
@@ -104,5 +104,26 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFoaXIiLCJpYXQiOjE2ODY2NzkzNTV9.rNn0UgUdzDEjn2KCj-CgaLPE52-P8AonQkc3JSsSjZU
 
 {
-    "invite_code":"mUXFZw"
+    "invite_code":"vCIhi0"
+}
+
+
+###
+GET http://localhost:3002/users
+###
+POST http://localhost:3002/user
+Content-Type: application/json
+
+{
+    "name":"jeevan",
+    "password":"123"
+}
+
+###
+POST http://localhost:3002/user
+Content-Type: application/json
+
+{
+    "name":"jeevan",
+    "password":"123"
 }
