@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { ReadyState } from "react-use-websocket";
 import dateFormat from "dateformat";
-import url from "./endpoint";
+
+import url from "../endpoint.json";
 
 const MessageBox = ({
   token,

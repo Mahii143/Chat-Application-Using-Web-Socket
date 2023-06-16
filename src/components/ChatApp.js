@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import useWebSocket from "react-use-websocket";
-import LogoutBtn from "./LogoutBtn";
-import { useEffect } from "react";
-import LogoImg from "../images/logo.png";
+import React, { useState, useEffect } from "react";
 import { Link, Route, Routes, useParams } from "react-router-dom";
+import useWebSocket from "react-use-websocket";
+
+import LogoImg from "../images/logo.png";
+import LogoutBtn from "./LogoutBtn";
 import ChannelList from "./ChannelList";
 import MessageBox from "./MessageBox";
-// import ErrorPage from "./ErrorPage";
 import SelectChannelPage from "./SelectChannelPage";
 import ChannelOptions from "./ChannelOptions";
-import url from "./endpoint";
+import url from "../endpoint.json";
+// import ErrorPage from "./ErrorPage";
 
 
 const wsurl = url.wsurl;

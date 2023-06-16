@@ -6,7 +6,7 @@ const LogoutBtn = ({ setToken }) => {
   const logout = () => {
     localStorage.clear();
     setToken({ accessToken: null, refreshToken: null });
-    Navigate('/');
+    Navigate("/");
   };
   return (
     <button className="logout-button" onClick={logout}>

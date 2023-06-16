@@ -1,6 +1,6 @@
-import React from "react";
-import { useState } from "react";
-import url from "./endpoint";
+import React, { useState } from "react";
+
+import url from "../endpoint.json";
 
 const Login = ({ setToken }) => {
   const [username, setUsername] = useState("");

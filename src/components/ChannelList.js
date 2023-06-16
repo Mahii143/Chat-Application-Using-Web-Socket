@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import url from "./endpoint";
+import url from "../endpoint.json";
 
 const ChannelList = ({ token, setChannels, setChannelId }) => {
   const [channel, setChannel] = useState([]);

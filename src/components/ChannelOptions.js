@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
-import url from "./endpoint";
+import { useNavigate } from "react-router-dom";
+
+import url from "../endpoint.json";
 
 const ChannelOptions = ({ token, chlname, setChlname, chlnamejoin }) => {
+  const Navigate = useNavigate();
   const [invCode, setInvCode] = useState("");
+
   const createChannel = async (e) => {
     e.preventDefault();
     if (chlname === null) return;
@@ -18,8 +22,13 @@ const ChannelOptions = ({ token, chlname, setChlname, chlnamejoin }) => {
         body: JSON.stringify({
           channel_name: chlname,
         }),
-      });
-      setChlname("");
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setChlname("");
+          Navigate("/" + data.channel_id);
+        })
+        .catch((err) => console.log(err.message));
     } catch (err) {
       console.log(err.message);
     }
@@ -94,6 +103,7 @@ const ChannelOptions = ({ token, chlname, setChlname, chlnamejoin }) => {
         alert("Error while joining");
         return;
       }
+      Navigate("/" + channelId);
     } catch (err) {
       console.log(err);
     }

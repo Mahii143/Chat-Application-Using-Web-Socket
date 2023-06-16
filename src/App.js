@@ -1,9 +1,8 @@
-import React from "react";
-import { useState } from "react";
-import Login from "./components/Login";
-import { useEffect } from "react";
-import ChatApp from "./components/ChatApp";
+import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+
+import Login from "./components/Login";
+import ChatApp from "./components/ChatApp";
 
 function App() {
   const [token, setToken] = useState({
@@ -17,7 +16,7 @@ function App() {
     if (token.refreshToken !== null)
       localStorage.setItem("refreshToken", token.refreshToken);
   }, [token]);
-  
+
   if (token.accessToken === null && token.refreshToken === null)
     return (
       <div className="app">
@@ -30,7 +29,10 @@ function App() {
     return (
       <div className="app">
         <Routes>
-          <Route path="*" element={<ChatApp token={token} setToken={setToken} />} />
+          <Route
+            path="*"
+            element={<ChatApp token={token} setToken={setToken} />}
+          />
         </Routes>
       </div>
     );
