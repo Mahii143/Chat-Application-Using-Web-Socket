@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import Login from "./components/Login";
 import ChatApp from "./components/ChatApp";
@@ -30,6 +30,7 @@ function App() {
           <Routes>
             <Route path="/signin" element={<Login setToken={setToken} />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="*" element={<Navigate to="/signin" replace />} />
           </Routes>
         </div>
       </div>
