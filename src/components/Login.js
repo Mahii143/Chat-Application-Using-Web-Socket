@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import url from "../endpoint.json";
 
 const Login = ({ setToken }) => {
   const [username, setUsername] = useState("");
-
+  const Navigate = useNavigate();
   const getToken = async (username) => {
     const endpoint = url.endpoint + "login";
     try {
@@ -22,7 +23,10 @@ const Login = ({ setToken }) => {
           }
           return res.json();
         })
-        .then((data) => setToken({ ...data }));
+        .then((data) => {
+          setToken({ ...data });
+          Navigate("../");
+        });
     } catch (error) {
       alert(error);
       console.log(error.message);
@@ -37,7 +41,7 @@ const Login = ({ setToken }) => {
     <form onSubmit={handleSubmit} className="login-form">
       <h1>Good to see you again</h1>
       <p>Welcome to Mahir chatapp!</p>
-      <label htmlFor="uname" className='login-input-label'>
+      <label htmlFor="uname" className="login-input-label">
         USER NAME
         <input
           type="text"
@@ -48,7 +52,8 @@ const Login = ({ setToken }) => {
           placeholder="user name"
         />
       </label>
-      <button>submit</button>
+      <button>sign in</button>
+      <p>Don't have an account? <Link to='../signup' className='route-login'>sign up</Link> </p>
     </form>
   );
 };

@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Login from "./components/Login";
 import ChatApp from "./components/ChatApp";
+import Signup from "./components/Signup";
 
 function App() {
   const [token, setToken] = useState({
@@ -19,9 +20,17 @@ function App() {
 
   if (token.accessToken === null && token.refreshToken === null)
     return (
+      // <div className="app">
+      //   <div className="login-container">
+      //     <Login setToken={setToken} />
+      //   </div>
+      // </div>
       <div className="app">
         <div className="login-container">
-          <Login setToken={setToken} />
+          <Routes>
+            <Route path="/signin" element={<Login setToken={setToken} />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
         </div>
       </div>
     );

@@ -445,3 +445,12 @@ button:hover {
   text-transform: none;
   color:var(--magenda);
 }
+
+.route-login {
+  text-decoration: none;
+  color: var(--greenshade);
+}
+.route-signup {
+  text-decoration: none;
+  color: var(--coral);
+}
