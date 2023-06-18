@@ -11,7 +11,6 @@ import ChannelOptions from "./ChannelOptions";
 import url from "../endpoint.json";
 // import ErrorPage from "./ErrorPage";
 
-
 const wsurl = url.wsurl;
 
 const emptyObject = {
@@ -32,12 +31,15 @@ const ChatApp = ({ token, setToken }) => {
   const [chlname, setChlname] = useState("");
   const [chlnamejoin, setChlnamejoin] = useState("");
   const [code, setCode] = useState("");
+  const [mutex, setMutex] = useState(false);
 
   const params = useParams();
   useEffect(() => {
     setChannelId(params["*"]);
     // eslint-disable-next-line
   }, [params["*"]]);
+
+  useEffect(() => console.log(mutex), [mutex]);
 
   const handleMessage = (event) => {
     // console.log(event);
@@ -125,8 +127,10 @@ const ChatApp = ({ token, setToken }) => {
 
   const send = async (e) => {
     e.preventDefault();
-    if (content === "" || cid === null) return;
-    // const endpointSend = "http://localhost:3001/send";
+    if (content === "" || cid === null) {
+      setMutex(false);
+      return;
+    }
     const endpointSend = url.endpoint + "send-message";
     try {
       await fetch(endpointSend, {
@@ -141,8 +145,10 @@ const ChatApp = ({ token, setToken }) => {
           content: content,
           timestamp: Date.now(),
         }),
+      }).then(() => {
+        setContent("");
+        setMutex(false);
       });
-      setContent("");
     } catch (err) {
       console.log(err.message);
     }
@@ -151,8 +157,10 @@ const ChatApp = ({ token, setToken }) => {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      // document.getElementById("myForm").submit();
-      send(e);
+      if (mutex === false) {
+        setMutex(true);
+        send(e);
+      }
     }
   };
 
@@ -162,7 +170,7 @@ const ChatApp = ({ token, setToken }) => {
 
   const createCode = async () => {
     try {
-      const endpointCreateInv = url.endpoint + "create-invite"
+      const endpointCreateInv = url.endpoint + "create-invite";
       const response = await fetch(endpointCreateInv, {
         method: "POST",
         headers: {
