@@ -145,10 +145,14 @@ const ChatApp = ({ token, setToken }) => {
           content: content,
           timestamp: Date.now(),
         }),
-      }).then(() => {
-        setContent("");
-        setMutex(false);
-      });
+      })
+        .then(() => {
+          setContent("");
+          setMutex(false);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } catch (err) {
       console.log(err.message);
     }
